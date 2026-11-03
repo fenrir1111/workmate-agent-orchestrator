@@ -84,6 +84,37 @@ curl -s localhost:8000/export-plan -H 'Content-Type: application/json' \
 ```
 **可控、可审计、可人工接管**：状态机 + 三级权限白名单 + HITL 审批 + 重试/超时。
 
+## 系统实拍（真实运行截图）
+
+以下截图均为**本仓库真实运行**产出（`make ui` 起控制台 + `make demo` 跑全链路），未经修饰。
+
+### 1. 流程执行 · 每步状态可见
+
+选流程 `invoice-reimbursement`、角色 `finance`，点「执行」——每一步的状态、尝试次数、耗时、跳过原因全部列出：
+
+![流程执行结果](docs/screenshots/orchestrator-01-run.png)
+
+### 2. 流程画布 · 步骤与工具链路
+
+![流程画布](docs/screenshots/orchestrator-02-flow.png)
+
+### 3. 工具注册表 · 真实落地替换点
+
+工具清单、参数与说明一目了然，落地时把 handler 换成 SQL / RAG / HTTP / 通知实现即可：
+
+![工具注册表](docs/screenshots/orchestrator-03-tools.png)
+
+### 4. `make demo` 终端输出
+
+```text
+[1] 发票报销审批流（role=finance, 金额 15000 → 触发人工审批）
+  状态: WAITING_APPROVAL  待审批节点: human_approve
+[4] 越权角色（role=viewer, 不在流程白名单 [finance, admin]）
+  状态: ABORTED  原因: 角色 viewer 不在流程白名单 ['finance', 'admin']
+```
+
+![make demo 终端输出](docs/screenshots/workmate-agent-orchestrator-demo-terminal.png)
+
 ## 核心接口
 | 方法 | 路径 | 说明 |
 |---|---|---|

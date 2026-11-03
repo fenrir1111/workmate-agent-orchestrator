@@ -5,11 +5,23 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import streamlit as st
 
-from .audit import AuditLogger
-from .config import get_settings
-from .engine.orchestrator import Orchestrator, load_flows
+# Streamlit 以「独立脚本」方式执行本文件（无 __package__），相对导入会直接 ImportError。
+# 这里把 src/ 加入 sys.path 并改用绝对导入，保证「clone 即跑」和「已安装」两种场景都能启动。
+_SRC = Path(__file__).resolve().parents[1]
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from agent_orchestrator.audit import AuditLogger  # noqa: E402
+from agent_orchestrator.config import get_settings  # noqa: E402
+from agent_orchestrator.engine.orchestrator import (  # noqa: E402
+    Orchestrator,
+    load_flows,
+)
 
 
 @st.cache_resource
