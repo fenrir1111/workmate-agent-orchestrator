@@ -2,7 +2,7 @@
 > 轻量企业数字员工编排平台｜面向 B 端 POC 的 Agent 可视化编排，权限隔离、人工介入、审计闭环
 
 > 属于【enterprise-ai-stack】B端私有化 AI 交付底座合集
-> 👉 总入口：https://github.com/你的用户名/enterprise-ai-stack
+> 👉 总入口：https://github.com/fenrir1111/enterprise-ai-stack
 
 ## 一句话简介
 轻量级 Agent 编排底座，面向交付团队快速搭建企业数字员工 POC；**不做花哨多智能体**，
