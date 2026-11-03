@@ -1,4 +1,7 @@
 # workmate-agent-orchestrator
+
+[![Python](https://img.shields.io/badge/python-%E2%89%A53.10-3776AB)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-7A8796)](#license) [![Version](https://img.shields.io/badge/v-0.1.0-555555)]() [![Tests](https://img.shields.io/badge/tests-33_passing-43853D)]()
+
 > 轻量企业数字员工编排平台｜面向 B 端 POC 的 Agent 可视化编排，权限隔离、人工介入、审计闭环
 
 > 属于【enterprise-ai-stack】B端私有化 AI 交付底座合集
@@ -65,6 +68,21 @@ curl -s localhost:8000/approve -H 'Content-Type: application/json' \
 curl -s localhost:8000/export-plan -H 'Content-Type: application/json' \
   -d '{"run_id":"<run_id>","fmt":"markdown"}'
 ```
+
+## 真实运行效果（`make demo` 真实输出，节选）
+```text
+[发票报销 金额=15000, role=finance] → WAITING_APPROVAL（高风险节点强制人工介入）
+  ocr → compliance → [WAITING_APPROVAL] human_approve
+  approve → SUCCEEDED（5 步全过，SLA 达标 8000ms）
+
+[发票报销 金额=500] → SUCCEEDED
+  ocr → compliance → [SKIPPED 条件不满足] human_approve → budget → notify   ← 小额自动过
+
+[role=viewer] → ABORTED：不在流程白名单 [finance, admin]   ← 流程级越权
+[flaky 工具]  → SUCCEEDED attempts=3                         ← 自动重试
+[slow 工具]   → TIMEOUT（>0.05s，非阻塞）                    ← 超时控制
+```
+**可控、可审计、可人工接管**：状态机 + 三级权限白名单 + HITL 审批 + 重试/超时。
 
 ## 核心接口
 | 方法 | 路径 | 说明 |
