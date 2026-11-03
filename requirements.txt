@@ -1,0 +1,10 @@
+fastapi>=0.110,<0.116
+uvicorn>=0.29
+pydantic>=2.6
+pydantic-settings>=2.2
+httpx>=0.27
+pytest>=8.0
+
+# 可选（默认不安装，装了才启用对应能力）
+# streamlit>=1.35  # 轻量可视化后台
+# litellm>=1.40   # 接真实 LLM 工具（摘要/规划）

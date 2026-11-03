@@ -1,0 +1,18 @@
+services:
+  agent-orchestrator:
+    build: .
+    container_name: workmate-agent-orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - FLOWS_PATH=./data/flows.json
+      - AUDIT_LOG_PATH=./data/audit.log
+      - PLAN_EXPORT_DIR=./data/plans
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped

@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# 先装依赖，利用分层缓存
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 拷贝代码并安装本项目（hatchling 构建）
+COPY . .
+RUN pip install --no-cache-dir .
+
+# 数据卷：流程定义、执行审计、方案包导出
+RUN mkdir -p /app/data
+VOLUME ["/app/data"]
+
+EXPOSE 8000
+CMD ["uvicorn", "agent_orchestrator.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,109 @@
+{
+  "flows": [
+    {
+      "id": "invoice-reimbursement",
+      "name": "发票报销审批流",
+      "version": "0.1.0",
+      "description": "OCR识别发票 → 合规判断 → (超阈值人工审批) → 预算校验 → 通知",
+      "allowed_roles": ["finance", "admin"],
+      "sla_ms": 8000,
+      "steps": [
+        {
+          "id": "ocr",
+          "name": "发票OCR识别",
+          "tool": "ocr_invoice",
+          "args": {"file": "{{inputs.file}}"},
+          "timeout": 3
+        },
+        {
+          "id": "compliance",
+          "name": "合规/审批阈值判断",
+          "tool": "check_compliance",
+          "args": {"amount": "{{steps.ocr.amount}}"}
+        },
+        {
+          "id": "human_approve",
+          "name": "财务负责人审批",
+          "tool": "noop",
+          "requires_approval": true,
+          "condition": {"prev": "compliance", "field": "approval_required", "op": "eq", "value": true},
+          "args": {"summary": "金额 {{steps.ocr.amount}} 元，需审批"}
+        },
+        {
+          "id": "budget",
+          "name": "预算校验",
+          "tool": "query_db",
+          "args": {"query": "预算余额"}
+        },
+        {
+          "id": "notify",
+          "name": "结果通知",
+          "tool": "send_notification",
+          "args": {"channel": "email", "to": "{{inputs.applicant}}", "message": "报销单已处理"}
+        }
+      ]
+    },
+    {
+      "id": "data-report",
+      "name": "数据报表生成流",
+      "version": "0.1.0",
+      "description": "查询数据 → 生成报告 → (仅admin可发布) → 通知",
+      "allowed_roles": ["analyst", "admin"],
+      "sla_ms": 6000,
+      "steps": [
+        {
+          "id": "query",
+          "name": "数据查询",
+          "tool": "query_db",
+          "args": {"query": "{{inputs.query}}"}
+        },
+        {
+          "id": "report",
+          "name": "生成报告",
+          "tool": "generate_report",
+          "args": {"title": "{{inputs.title}}", "sections": ["数据概览", "异常提示"]}
+        },
+        {
+          "id": "publish",
+          "name": "发布报表",
+          "tool": "noop",
+          "allowed_roles": ["admin"]
+        },
+        {
+          "id": "notify",
+          "name": "通知订阅者",
+          "tool": "send_notification",
+          "args": {"channel": "dingtalk", "to": "{{inputs.subscriber}}", "message": "报表已生成"}
+        }
+      ]
+    },
+    {
+      "id": "rag-answer",
+      "name": "RAG问答流",
+      "version": "0.1.0",
+      "description": "意图识别 → RAG检索 → 摘要（可替换为 rag-gateway 适配器）",
+      "allowed_roles": [],
+      "sla_ms": 0,
+      "steps": [
+        {
+          "id": "intent",
+          "name": "意图识别",
+          "tool": "classify_intent",
+          "args": {"text": "{{inputs.text}}"}
+        },
+        {
+          "id": "search",
+          "name": "RAG检索",
+          "tool": "rag_search",
+          "args": {"question": "{{inputs.text}}"}
+        },
+        {
+          "id": "summarize",
+          "name": "摘要",
+          "tool": "llm_summarize",
+          "args": {"text": "{{steps.search.answer}}"}
+        }
+      ]
+    }
+  ]
+}
