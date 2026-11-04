@@ -51,6 +51,7 @@
 
 </details>
 
+> 模块级依赖图（Mermaid）与依赖不变量见 [docs/architecture.md](docs/architecture.md)。
 
 ## 快速启动
 ### 方式一：uv（推荐，本地）
