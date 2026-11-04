@@ -52,7 +52,9 @@ CI 会自动跑上面两步，再加 FastAPI `/health` 与 Streamlit 控制台�
 - **行宽 100 以内**，命名 `snake_case`，公开 API 用 docstring 说明「为什么」
 - **相对导入用绝对导入**：`streamlit_app.py` 会被 Streamlit 当独立脚本执行，
   相对导入会直接 `ImportError` —— 统一写成 `from agent_orchestrator.xxx import ...`。
-  `tests/test_streamlit_app.py` 会在 CI 里守住这条。
+  **包括 `if` 分支 / 函数里的延迟导入** —— 那类 bug 首屏正常，只有用户点到该分支才炸，
+  AppTest 初始渲染和 HTTP 200 都看不出来。`tests/test_streamlit_app.py` 用 AST 全量扫描 +
+  点击主按钮的交互冒烟，在 CI 里守住这条。
 - **状态机改动必须配状态迁移测试**：每个状态、每个终态都要有断言
 - **执行记录字段只增不改**：已发布的字段语义不能变，否则历史审计记录会失效
 
