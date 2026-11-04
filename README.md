@@ -30,12 +30,21 @@
 6. **导出 Agent 方案包**（JSON / Markdown），直接交付客户 POC。
 
 ## 架构简图
+
+![workmate-agent-orchestrator 架构图](docs/workmate-agent-orchestrator-architecture.png)
+
+<details>
+<summary>文本版架构简图</summary>
+
 ```
 编排画布 → 任务定义 → 工具调用路由 → 权限校验(三级) → 执行分支(自动/人工) → 日志&审计
                                    │
               ┌────────────────────┼────────────────────┐
         内置确定性工具        rag-gateway 适配器     semantic-sql-guard 适配器
 ```
+
+</details>
+
 
 ## 快速启动
 ### 方式一：uv（推荐，本地）
@@ -190,6 +199,7 @@ make demo    # 全链路 demo
 ## 参与共建
 欢迎提交 Issue（反馈 bug、补充流程模板）、PR（适配真实工具、并行分支、状态外置）。
 有效贡献在 README 致谢栏署名。
+详细流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## License
 MIT License，可自由使用、二次修改、商用；当前为 v0 版本，生产使用请自行评估风险。
