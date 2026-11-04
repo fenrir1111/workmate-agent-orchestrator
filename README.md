@@ -13,6 +13,12 @@
 
 ![workmate-agent-orchestrator 流程执行 · 真实运行](docs/screenshots/orchestrator-01-run.png)
 
+## 🎬 一条命令跑通（真实终端录制）
+
+`make demo` 一条命令跑通全链路（**真实终端录制**，非模拟）：人工审批介入 → 条件门跳过 → 越权中止 → 步骤级权限 → 重试/超时：
+
+![workmate-agent-orchestrator 一条命令跑通 · 真实终端录制](docs/quickstart.gif)
+
 ## 一句话简介
 轻量级 Agent 编排底座，面向交付团队快速搭建企业数字员工 POC；**不做花哨多智能体**，
 优先保证**可控、可审计、可人工接管**，对接知识库、SQL 查询、审批单据等企业工具。
@@ -85,6 +91,9 @@ curl -s localhost:8000/export-plan -H 'Content-Type: application/json' \
 ```
 
 ## 真实运行效果（`make demo` 真实输出，节选）
+
+> 想看**动画版**（真实终端逐行录制）见文首「🎬 一条命令跑通」。
+
 ```text
 [发票报销 金额=15000, role=finance] → WAITING_APPROVAL（高风险节点强制人工介入）
   ocr → compliance → [WAITING_APPROVAL] human_approve
