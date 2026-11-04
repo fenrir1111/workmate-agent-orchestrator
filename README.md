@@ -7,6 +7,12 @@
 > 属于【enterprise-ai-stack】B端私有化 AI 交付底座合集
 > 👉 总入口：https://github.com/fenrir1111/enterprise-ai-stack
 
+## 🚀 运行效果（真实截图）
+
+选流程 `invoice-reimbursement`、角色 `finance`，点「执行」→ 每步状态、尝试次数、跳过原因全部可见（越权角色直接 `ABORTED`）：
+
+![workmate-agent-orchestrator 流程执行 · 真实运行](docs/screenshots/orchestrator-01-run.png)
+
 ## 一句话简介
 轻量级 Agent 编排底座，面向交付团队快速搭建企业数字员工 POC；**不做花哨多智能体**，
 优先保证**可控、可审计、可人工接管**，对接知识库、SQL 查询、审批单据等企业工具。
@@ -90,9 +96,7 @@ curl -s localhost:8000/export-plan -H 'Content-Type: application/json' \
 
 ### 1. 流程执行 · 每步状态可见
 
-选流程 `invoice-reimbursement`、角色 `finance`，点「执行」——每一步的状态、尝试次数、耗时、跳过原因全部列出：
-
-![流程执行结果](docs/screenshots/orchestrator-01-run.png)
+选流程 `invoice-reimbursement`、角色 `finance`，点「执行」——每一步的状态、尝试次数、耗时、跳过原因全部列出（见文首「🚀 运行效果」）：
 
 ### 2. 流程画布 · 步骤与工具链路
 
