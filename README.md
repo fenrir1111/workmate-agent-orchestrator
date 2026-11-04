@@ -1,6 +1,6 @@
 # workmate-agent-orchestrator
 
-[![Python](https://img.shields.io/badge/python-%E2%89%A53.10-3776AB)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-7A8796)](#license) [![Version](https://img.shields.io/badge/v-0.1.0-555555)]() [![Tests](https://img.shields.io/badge/tests-33_passing-43853D)]()
+[![Python](https://img.shields.io/badge/python-%E2%89%A53.10-3776AB)](https://www.python.org/) [![License](https://img.shields.io/badge/license-MIT-7A8796)](#license) [![Version](https://img.shields.io/badge/v-0.1.0-555555)]() [![Tests](https://img.shields.io/badge/tests-35_passing-43853D)]() [![CI](https://github.com/fenrir1111/workmate-agent-orchestrator/actions/workflows/ci.yml/badge.svg)](https://github.com/fenrir1111/workmate-agent-orchestrator/actions/workflows/ci.yml)
 
 > 轻量企业数字员工编排平台｜面向 B 端 POC 的 Agent 可视化编排，权限隔离、人工介入、审计闭环
 
@@ -140,6 +140,28 @@ curl -s localhost:8000/export-plan -H 'Content-Type: application/json' \
   [`examples/sql_guard_adapter.py`](examples/sql_guard_adapter.py)。
 - **接真实 LLM / 消息通知**：把内置工具的 handler 替换为真实实现（LiteLLM / 飞书 / 钉钉）。
 - **多实例高可用**：外置 `FlowRun` 状态（DB/Redis），基于快照恢复。
+
+## CI 与质量门禁
+
+每次 push / PR 自动跑 [GitHub Actions](https://github.com/fenrir1111/workmate-agent-orchestrator/actions/workflows/ci.yml)（Python 3.10 + 3.12 双版本矩阵）：
+
+| 环节 | 检查内容 |
+|---|---|
+| 单元测试 | `pytest` 全量（含 Streamlit 控制台冒烟，捕获脚本被当独立模块执行时的 ImportError） |
+| demo 冒烟 | `python -m agent_orchestrator.demo` 全链路跑通，退出码必须为 0 |
+| FastAPI 冒烟 | 起 `uvicorn` 并请求 `/health`，30s 内未就绪即失败 |
+| Streamlit 冒烟 | 起控制台并请求 `/_stcore/health`，30s 内未就绪即失败 |
+
+> 其中 `tests/test_streamlit_app.py` 用 Streamlit 官方 `AppTest` **真正执行一遍页面脚本**：
+> Streamlit 是把 `streamlit_app.py` 当独立脚本跑的（没有 `__package__`），
+> 一旦脚本里用了相对导入就会直接 `ImportError`，但页面仍返回 HTTP 200 —— 只有真跑一遍才发现得了。
+
+本地复现：
+
+```bash
+make test    # 单元测试 + 控制台冒烟
+make demo    # 全链路 demo
+```
 
 ## 设计原则
 - **可控优先**：节点顺序与分支由画布定义，模型只影响"工具产出"，不自主改路径。

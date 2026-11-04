@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: CI-workmate-agent-orchestrator-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 测试 / 冒烟 (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 安装 Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: 安装依赖
+        run: |
+          uv venv --python ${{ matrix.python-version }} .venv
+          uv pip install --python .venv/bin/python -r requirements.txt
+          uv pip install --python .venv/bin/python -e .
+          uv pip install --python .venv/bin/python "streamlit>=1.35"
+
+      # 含 Streamlit 控制台冒烟（tests/test_streamlit_app.py）：
+      # 页面脚本被当成独立模块执行时的 ImportError 会被直接捕获
+      - name: 单元测试
+        run: .venv/bin/python -m pytest -q --basetemp="$PWD/.pytest-tmp"
+
+      - name: 全链路 demo 冒烟（无需起服务）
+        run: .venv/bin/python -m agent_orchestrator.demo
+
+      - name: FastAPI 服务冒烟
+        run: |
+          .venv/bin/python -m uvicorn agent_orchestrator.main:app --host 127.0.0.1 --port 8000 \
+            > /tmp/uvicorn.log 2>&1 &
+          UVICORN_PID=$!
+          trap 'kill $UVICORN_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000/health > /dev/null; then
+              echo "✅ /health 正常:"
+              curl -s http://127.0.0.1:8000/health
+              echo ""
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "❌ 服务 30s 内未就绪，日志："
+          cat /tmp/uvicorn.log
+          exit 1
+
+      - name: Streamlit 控制台冒烟（HTTP 健康检查）
+        run: |
+          .venv/bin/python -m streamlit run src/agent_orchestrator/streamlit_app.py \
+            --server.port 8501 --server.headless true --server.address 127.0.0.1 \
+            > /tmp/streamlit.log 2>&1 &
+          ST_PID=$!
+          trap 'kill $ST_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8501/_stcore/health > /dev/null; then
+              echo "✅ Streamlit 健康检查通过"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "❌ Streamlit 30s 内未就绪，日志："
+          cat /tmp/streamlit.log
+          exit 1
+
